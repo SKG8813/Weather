@@ -1,0 +1,8 @@
+// Defaults. Your own values go in Local.xcconfig (git-ignored), which overrides these.
+BUNDLE_ID_PREFIX = com.example
+DEVELOPMENT_TEAM =
+PIRATE_WEATHER_KEY =
+
+#include? "Local.xcconfig"
+
+APP_GROUP_ID = group.$(BUNDLE_ID_PREFIX).upslope

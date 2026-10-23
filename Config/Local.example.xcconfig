@@ -1,0 +1,10 @@
+// Copy this file to Local.xcconfig and fill it in. Local.xcconfig is git-ignored.
+
+// Anything unique to you, reverse-DNS style. Bundle IDs become <prefix>.upslope.
+BUNDLE_ID_PREFIX = com.yourname
+
+// Xcode > Settings > Accounts > your Apple ID > Personal Team. The 10-character Team ID.
+DEVELOPMENT_TEAM = ABCDE12345
+
+// Free key from https://pirateweather.net. Leave empty to use Open-Meteo only (15-minute steps).
+PIRATE_WEATHER_KEY =

@@ -76,6 +76,25 @@ final class NextHourAnalyzerTests: XCTestCase {
         XCTAssertEqual(try XCTUnwrap(NextHourAnalyzer.analyze(h, now: now).event).type, .mix)
     }
 
+    func testBarsLineUpWithMinutes() {
+        let h = hour { i in (12..<52).contains(i) ? 0.1 : 0 }
+        let bars = NextHourBars.bars(h, now: now)
+        XCTAssertEqual(bars.count, 60)
+        XCTAssertEqual(bars[11].level, 0)
+        XCTAssertEqual(bars[12].level, 1.0, accuracy: 0.001)
+        XCTAssertEqual(bars[12].intensity, .heavy)
+        XCTAssertEqual(bars[52].intensity, .none)
+        XCTAssertEqual(NextHourBars.bars(nil, now: now).filter { $0.level > 0 }.count, 0)
+    }
+
+    func testBarsFromFifteenMinuteSteps() {
+        let pts = (0..<4).map { i in
+            MinutePoint(time: now.addingTimeInterval(Double(i) * 900), rate: i == 1 ? 0.15 : 0, probability: 0.8, type: i == 1 ? .rain : .none)
+        }
+        let bars = NextHourBars.bars(NextHour(points: pts, stepMinutes: 15), now: now)
+        XCTAssertEqual(bars.filter { $0.level > 0 }.map(\.minute), Array(15..<30))
+    }
+
     func testIntensityThresholds() {
         XCTAssertEqual(IntensityRules.intensity(rate: 0.003, type: .rain), .none)
         XCTAssertEqual(IntensityRules.intensity(rate: 0.05, type: .rain), .light)

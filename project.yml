@@ -1,0 +1,109 @@
+# XcodeGen spec. Run `xcodegen` in this folder to create Upslope.xcodeproj.
+name: Upslope
+options:
+  deploymentTarget:
+    iOS: "18.0"
+  createIntermediateGroups: true
+  developmentLanguage: en
+
+configFiles:
+  Debug: Config/Shared.xcconfig
+  Release: Config/Shared.xcconfig
+
+packages:
+  UpslopeCore:
+    path: Packages/UpslopeCore
+
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    CODE_SIGN_STYLE: Automatic
+    MARKETING_VERSION: "0.1"
+    CURRENT_PROJECT_VERSION: "1"
+    TARGETED_DEVICE_FAMILY: "1"
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+
+targets:
+  Upslope:
+    type: application
+    platform: iOS
+    sources:
+      - App
+      - Shared
+    dependencies:
+      - package: UpslopeCore
+      - target: UpslopeWidgets
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(BUNDLE_ID_PREFIX).upslope
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+    entitlements:
+      path: App/Upslope.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - $(APP_GROUP_ID)
+    info:
+      path: App/Info.plist
+      properties:
+        CFBundleDisplayName: Upslope
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        UILaunchScreen:
+          UIColorName: ""
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        UIUserInterfaceStyle: Dark
+        UIBackgroundModes:
+          - fetch
+        BGTaskSchedulerPermittedIdentifiers:
+          - $(PRODUCT_BUNDLE_IDENTIFIER).refresh
+        NSLocationWhenInUseUsageDescription: Upslope uses your location for the next-hour forecast where you are.
+        NSLocationAlwaysAndWhenInUseUsageDescription: With "Always", Upslope can check for rain or snow when you move, so alerts follow you.
+        NSSupportsLiveActivities: true
+        UIAppFonts: [Barlow-Regular.ttf, Barlow-Medium.ttf, Barlow-SemiBold.ttf, BarlowCondensed-SemiBold.ttf, BarlowCondensed-Bold.ttf]
+        PirateWeatherKey: $(PIRATE_WEATHER_KEY)
+        AppGroupID: $(APP_GROUP_ID)
+
+  UpslopeWidgets:
+    type: app-extension
+    platform: iOS
+    sources:
+      - Widgets
+      - Shared
+      - path: App/Fonts
+        buildPhase: resources
+    dependencies:
+      - package: UpslopeCore
+      - sdk: WidgetKit.framework
+      - sdk: SwiftUI.framework
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(BUNDLE_ID_PREFIX).upslope.widgets
+    entitlements:
+      path: Widgets/UpslopeWidgets.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - $(APP_GROUP_ID)
+    info:
+      path: Widgets/Info.plist
+      properties:
+        CFBundleDisplayName: Upslope
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+        NSWidgetWantsLocation: true
+        NSLocationWhenInUseUsageDescription: Upslope uses your location for the next-hour forecast where you are.
+        UIAppFonts: [Barlow-Regular.ttf, Barlow-Medium.ttf, Barlow-SemiBold.ttf, BarlowCondensed-SemiBold.ttf, BarlowCondensed-Bold.ttf]
+        PirateWeatherKey: $(PIRATE_WEATHER_KEY)
+        AppGroupID: $(APP_GROUP_ID)
+
+schemes:
+  Upslope:
+    build:
+      targets:
+        Upslope: all
+        UpslopeWidgets: all
+    run:
+      config: Debug

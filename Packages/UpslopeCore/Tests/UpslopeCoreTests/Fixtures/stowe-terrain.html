@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<!-- SYNTHETIC FIXTURE. Shaped like Vail Resorts terrain pages (FR.TerrainStatusFeed in a
+     script module, two feeds: one with JS dates and int statuses, one with ISO dates and
+     string statuses). Replace with a real capture from the phone's Diagnostics screen. -->
+<html>
+<head><title>Terrain &amp; Lift Status | Stowe</title></head>
+<body>
+<script type="module">
+FR.TerrainStatusFeed = {"Date":"\/Date(1792800000000)\/","Lifts":[{"Name":"Gondola","Status":1,"Type":"gondola"}],"GroomingAreas":[]};
+</script>
+<script type="module">
+FR.TerrainStatusFeed = {"Date":"2026-12-28T06:12:00-05:00","Lifts":[{"Name":"Gondola","Status":"Open","Type":"gondola","OpenTime":"08:00","CloseTime":"16:00"},{"Name":"FourRunner Quad","Status":"OnHold","Type":"quad"},{"Name":"Lookout Double","Status":"Closed","Type":"double"},{"Name":"Mountain Triple","Status":"Scheduled","Type":"triple"}],"GroomingAreas":[{"Name":"Mt. Mansfield","Runs":[{"Name":"Upper National","IsOpen":true,"Type":"Expert"},{"Name":"Lower National","IsOpen":true},{"Name":"Goat","IsOpen":false},{"Name":"Starr Glades","IsOpen":true},{"Name":"Liftline","IsOpen":false},{"Name":"Nose Dive","IsOpen":true, "Note":"Skier's {left} \"edge\""}]}]};
+</script>
+</body>
+</html>

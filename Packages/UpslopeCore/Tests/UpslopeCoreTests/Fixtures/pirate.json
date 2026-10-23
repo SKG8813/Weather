@@ -1,0 +1,16 @@
+{
+  "latitude": 44.4654,
+  "longitude": -72.6874,
+  "currently": {"time": 1792800000, "temperature": 31.2, "apparentTemperature": 24.1, "windSpeed": 9.4, "windGust": 15.0, "windBearing": 350},
+  "minutely": {"data": [
+    {"time": 1792800000, "precipIntensity": 0.0, "precipProbability": 0.0, "precipType": "none"},
+    {"time": 1792800060, "precipIntensity": 0.0, "precipProbability": 0.1, "precipType": "none"},
+    {"time": 1792800120, "precipIntensity": 0.03, "precipProbability": 0.8, "precipType": "snow"},
+    {"time": 1792800180, "precipIntensity": 0.06, "precipProbability": 0.9, "precipType": "snow"},
+    {"time": 1792800240, "precipIntensity": 0.11, "precipProbability": 0.9, "precipType": "snow"},
+    {"time": 1792800300, "precipIntensity": 0.05, "precipProbability": 0.9, "precipType": "snow"}
+  ]},
+  "daily": {"data": [
+    {"time": 1792800000, "icon": "snow", "temperatureHigh": 38, "temperatureLow": 29, "precipProbability": 0.7, "precipAccumulation": 1.5, "precipType": "snow"}
+  ]}
+}

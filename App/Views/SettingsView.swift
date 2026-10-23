@@ -5,7 +5,7 @@ import UpslopeCore
 struct SettingsView: View {
     @Environment(AppModel.self) private var model
     @State private var newTrail = ""
-    @State private var locationStatus = LocationService.shared.authorization
+    @State private var locationStatus: CLAuthorizationStatus = .notDetermined
 
     var body: some View {
         NavigationStack {

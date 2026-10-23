@@ -83,7 +83,7 @@ struct MansfieldView: View {
                             .foregroundStyle(Theme.accent)
                             .offset(x: 8, y: max(4, lineY - 20))
                         Text("Chin 4,393′")
-                            .font(UFont.body(10, weight: .bold))
+                            .font(UFont.body(10, weight: .semibold))
                             .foregroundStyle(Theme.muted)
                             .position(x: g.size.width * 222 / 350, y: 6)
                     }

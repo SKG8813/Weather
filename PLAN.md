@@ -70,7 +70,7 @@ Status: **draft for approval.** No code has been written yet.
 
 | Need | Source | Notes / limits |
 |---|---|---|
-| Next hour, minute by minute | **Pirate Weather** (primary) | Free API key you sign up for yourself. The free tier is roughly 10k calls a month (to verify), which covers 2 locations every ~15 min. The key stays in a local file that is never committed. |
+| Next hour, minute by minute | **Pirate Weather**, only when Open-Meteo shows rain or snow possible in the next 2 hours | Free API key you sign up for yourself. The free tier is roughly 10k calls a month (to verify), which covers 2 locations every ~15 min. The key stays in a local file that is never committed. |
 | Next hour, backup | **Open-Meteo** `minutely_15` | No key needed. 15-minute steps from NOAA's HRRR model in the US. Used if Pirate Weather fails. |
 | 7-day, hourly | **Open-Meteo** | Highs and lows, chances, rain and snowfall amounts, freezing level, upper-air winds |
 | Mansfield upper vs. base | **Open-Meteo** with the `elevation` setting | Separate forecasts for about 3,600′ (upper mountain) and about 1,560′ (Mansfield base). Exact elevations and coordinates to be confirmed. |

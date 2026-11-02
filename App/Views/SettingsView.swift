@@ -65,11 +65,11 @@ struct SettingsView: View {
                 } header: {
                     Text("Pirate Weather key")
                 } footer: {
-                    Text("Free from pirateweather.net. Gives minute-by-minute next-hour data. Without it, Upslope uses 15-minute data.")
+                    Text("Free from pirateweather.net. Used only when rain or snow is possible in the next 2 hours, so a free key goes a long way. Without it, Upslope uses 15-minute data.")
                 }
 
                 Section("Data") {
-                    LabeledContent("Next hour", value: AppConfig.pirateKey == nil ? "Open-Meteo (15 min)" : "Pirate Weather (1 min)")
+                    LabeledContent("Next hour", value: AppConfig.pirateKey == nil ? "Open-Meteo (15 min)" : "Pirate Weather when wet")
                     LabeledContent("7-day + Mansfield", value: "Open-Meteo")
                     LabeledContent("Forecaster's take", value: "NWS Burlington")
                     LabeledContent("Resort report", value: "stowe.com")

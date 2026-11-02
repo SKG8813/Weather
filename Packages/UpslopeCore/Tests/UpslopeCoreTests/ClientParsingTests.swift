@@ -6,13 +6,40 @@ func fixture(_ name: String) throws -> Data {
     return try Data(contentsOf: url)
 }
 
-/// Serves canned bodies by URL substring.
-struct StubHTTP: HTTPClient {
-    var routes: [(String, Data)]
+/// Serves canned bodies by URL substring and remembers which URLs were asked for.
+final class StubHTTP: HTTPClient, @unchecked Sendable {
+    let routes: [(String, Data)]
+    private let lock = NSLock()
+    private var _requested: [String] = []
+    var requested: [String] { lock.lock(); defer { lock.unlock() }; return _requested }
+
+    init(routes: [(String, Data)]) { self.routes = routes }
+
     func get(_ url: URL, headers: [String: String]) async throws -> Data {
+        lock.lock(); _requested.append(url.absoluteString); lock.unlock()
         guard let hit = routes.first(where: { url.absoluteString.contains($0.0) }) else { throw HTTPError.status(404) }
         return hit.1
     }
+
+    func calls(to fragment: String) -> Int { requested.filter { $0.contains(fragment) }.count }
+}
+
+/// The real Open-Meteo fixture with snow showing up 30 minutes out.
+func wetOpenMeteo() throws -> (Data, Date) {
+    var root = try XCTUnwrap(JSONSerialization.jsonObject(with: fixture("om-upper.json")) as? [String: Any])
+    var m15 = try XCTUnwrap(root["minutely_15"] as? [String: Any])
+    m15["precipitation"] = [0, 0, 0.02, 0.03, 0, 0, 0, 0]
+    m15["snowfall"] = [0, 0, 0.2, 0.3, 0, 0, 0, 0]
+    root["minutely_15"] = m15
+    let first = try XCTUnwrap((m15["time"] as? [NSNumber])?.first?.doubleValue)
+    return (try JSONSerialization.data(withJSONObject: root), Date(timeIntervalSince1970: first - 60))
+}
+
+/// "Now" for the dry fixture: just before its first 15-minute step.
+func dryNow() throws -> Date {
+    let root = try XCTUnwrap(JSONSerialization.jsonObject(with: fixture("om-upper.json")) as? [String: Any])
+    let m15 = try XCTUnwrap(root["minutely_15"] as? [String: Any])
+    return Date(timeIntervalSince1970: try XCTUnwrap((m15["time"] as? [NSNumber])?.first?.doubleValue) - 60)
 }
 
 final class ClientParsingTests: XCTestCase {
@@ -63,12 +90,42 @@ final class ClientParsingTests: XCTestCase {
         XCTAssertNotNil(f.current)
     }
 
-    func testForecastServicePrefersPirateForNextHour() async throws {
-        let http = StubHTTP(routes: [("pirateweather", try fixture("pirate.json")), ("open-meteo", try fixture("om-upper.json"))])
-        let f = try await ForecastService(pirateKey: "test", http: http).forecast(placeName: "Stowe", at: Places.stowe)
+    func testPirateIsUsedWhenPrecipitationIsPossible() async throws {
+        let (wet, now) = try wetOpenMeteo()
+        let http = StubHTTP(routes: [("pirateweather", try fixture("pirate.json")), ("open-meteo", wet)])
+        let f = try await ForecastService(pirateKey: "test", http: http).forecast(placeName: "Stowe", at: Places.stowe, now: now)
+        XCTAssertEqual(http.calls(to: "pirateweather"), 1)
         XCTAssertEqual(f.nextHourSource, .pirateWeather)
         XCTAssertEqual(f.current?.temperature, 31.2)
         XCTAssertEqual(f.days.count, 7, "7-day still comes from Open-Meteo")
+    }
+
+    func testPirateIsSkippedWhenItsDry() async throws {
+        let http = StubHTTP(routes: [("pirateweather", try fixture("pirate.json")), ("open-meteo", try fixture("om-upper.json"))])
+        let f = try await ForecastService(pirateKey: "test", http: http).forecast(placeName: "Stowe", at: Places.stowe, now: try dryNow())
+        XCTAssertEqual(http.calls(to: "pirateweather"), 0, "dry hour should not spend a Pirate Weather call")
+        XCTAssertEqual(f.nextHourSource, .openMeteo)
+        XCTAssertEqual(f.days.count, 7)
+    }
+
+    func testPirateIsTheBackupWhenOpenMeteoIsDown() async throws {
+        let http = StubHTTP(routes: [("pirateweather", try fixture("pirate.json"))])
+        let f = try await ForecastService(pirateKey: "test", http: http).forecast(placeName: "Stowe", at: Places.stowe)
+        XCTAssertEqual(f.nextHourSource, .pirateWeather)
+        XCTAssertEqual(f.days.count, 1, "falls back to Pirate Weather's daily data")
+    }
+
+    func testGateLooksAtHourlyChanceToo() throws {
+        var root = try XCTUnwrap(JSONSerialization.jsonObject(with: fixture("om-upper.json")) as? [String: Any])
+        var hourly = try XCTUnwrap(root["hourly"] as? [String: Any])
+        var chance = try XCTUnwrap(hourly["precipitation_probability"] as? [Any])
+        let times = try XCTUnwrap(hourly["time"] as? [NSNumber])
+        let now = Date(timeIntervalSince1970: times[10].doubleValue - 600)
+        XCTAssertFalse(PirateGate.wetPossible(try OpenMeteoData(json: JSONSerialization.data(withJSONObject: root)), now: now))
+        chance[11] = 40
+        hourly["precipitation_probability"] = chance
+        root["hourly"] = hourly
+        XCTAssertTrue(PirateGate.wetPossible(try OpenMeteoData(json: JSONSerialization.data(withJSONObject: root)), now: now))
     }
 
     func testUnsubstitutedBuildSettingIsTreatedAsNoKey() {

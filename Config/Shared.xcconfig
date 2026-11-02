@@ -1,5 +1,5 @@
 // Defaults. Your own values go in Local.xcconfig (git-ignored), which overrides these.
-BUNDLE_ID_PREFIX = com.example
+BUNDLE_ID_PREFIX = com.skg8813.weather
 DEVELOPMENT_TEAM =
 PIRATE_WEATHER_KEY =
 

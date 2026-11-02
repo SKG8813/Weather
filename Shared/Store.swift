@@ -20,7 +20,11 @@ struct SavedLocation: Codable, Equatable {
 
 /// Build-time values from Info.plist (filled from Config/Local.xcconfig).
 enum AppConfig {
+    /// Key entered in Settings wins; the build setting is a fallback for developers.
     static var pirateKey: String? {
+        if let k = Store.defaults.string(forKey: Store.pirateKeyKey)?.trimmingCharacters(in: .whitespacesAndNewlines), !k.isEmpty {
+            return k
+        }
         guard let k = Bundle.main.object(forInfoDictionaryKey: "PirateWeatherKey") as? String,
               !k.isEmpty, !k.hasPrefix("$(") else { return nil }
         return k
@@ -48,6 +52,8 @@ enum Store {
         case settings, alertState, trailSnapshot, lastLocation, mountain, report, discussion
         case lastRefresh, lastReportFetch
     }
+
+    static let pirateKeyKey = "pirateWeatherKey"
 
     static func forecastKey(_ place: PlaceChoice) -> String { "forecast.\(place.rawValue)" }
 

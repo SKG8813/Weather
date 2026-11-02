@@ -29,10 +29,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Xcode version
         run: xcodebuild -version
-      - name: Install XcodeGen
-        run: brew install xcodegen
-      - name: Generate project
-        run: xcodegen generate
+      # Builds the committed Upslope.xcodeproj, the same one you open on the Mac.
       - name: Build for iOS Simulator
         run: |
           set -o pipefail

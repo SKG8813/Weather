@@ -5,6 +5,7 @@ import UpslopeCore
 struct SettingsView: View {
     @Environment(AppModel.self) private var model
     @State private var newTrail = ""
+    @State private var pirateKey = Store.defaults.string(forKey: Store.pirateKeyKey) ?? ""
     @State private var locationStatus: CLAuthorizationStatus = .notDetermined
 
     var body: some View {
@@ -55,6 +56,18 @@ struct SettingsView: View {
                     Text("Alerts are always silent. Upslope never asks for sound permission.")
                 }
 
+                Section {
+                    SecureField("Paste your key", text: $pirateKey)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                        .onSubmit(savePirateKey)
+                    Button("Save key", action: savePirateKey)
+                } header: {
+                    Text("Pirate Weather key")
+                } footer: {
+                    Text("Free from pirateweather.net. Gives minute-by-minute next-hour data. Without it, Upslope uses 15-minute data.")
+                }
+
                 Section("Data") {
                     LabeledContent("Next hour", value: AppConfig.pirateKey == nil ? "Open-Meteo (15 min)" : "Pirate Weather (1 min)")
                     LabeledContent("7-day + Mansfield", value: "Open-Meteo")
@@ -86,6 +99,11 @@ struct SettingsView: View {
         case .restricted: return "Restricted"
         default: return "Not asked"
         }
+    }
+
+    func savePirateKey() {
+        Store.defaults.set(pirateKey.trimmingCharacters(in: .whitespacesAndNewlines), forKey: Store.pirateKeyKey)
+        Task { await model.refresh(force: true) }
     }
 
     func add() {

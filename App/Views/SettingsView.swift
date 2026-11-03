@@ -7,6 +7,15 @@ struct SettingsView: View {
     @State private var newTrail = ""
     @State private var pirateKey = Store.defaults.string(forKey: Store.pirateKeyKey) ?? ""
     @State private var locationStatus: CLAuthorizationStatus = .notDetermined
+    @State private var keyCheck: KeyCheck = .idle
+    @FocusState private var keyFieldFocused: Bool
+
+    /// What happened the last time "Save key" was tapped.
+    enum KeyCheck: Equatable {
+        case idle, checking, removed
+        case working(String)
+        case failed(String)
+    }
 
     var body: some View {
         NavigationStack {
@@ -60,8 +69,19 @@ struct SettingsView: View {
                     SecureField("Paste your key", text: $pirateKey)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
+                        .focused($keyFieldFocused)
                         .onSubmit(savePirateKey)
-                    Button("Save key", action: savePirateKey)
+                    Button(action: savePirateKey) {
+                        HStack {
+                            Text(keyCheck == .checking ? "Checking key…" : "Save key")
+                            if keyCheck == .checking {
+                                Spacer()
+                                ProgressView()
+                            }
+                        }
+                    }
+                    .disabled(keyCheck == .checking)
+                    keyStatusRow
                 } header: {
                     Text("Pirate Weather key")
                 } footer: {
@@ -101,9 +121,62 @@ struct SettingsView: View {
         }
     }
 
+    /// Shows what's stored and whether Pirate Weather accepted it.
+    @ViewBuilder var keyStatusRow: some View {
+        switch keyCheck {
+        case .idle:
+            if let stored = Store.defaults.string(forKey: Store.pirateKeyKey), stored.count >= 4 {
+                Label("Key saved (ends in \(stored.suffix(4)))", systemImage: "key.fill")
+                    .foregroundStyle(Theme.muted)
+            }
+        case .checking:
+            EmptyView()
+        case .removed:
+            Label("Key removed. Using Open-Meteo's 15-minute data.", systemImage: "minus.circle")
+                .foregroundStyle(Theme.muted)
+        case .working(let detail):
+            Label(detail, systemImage: "checkmark.circle.fill")
+                .foregroundStyle(Theme.trailGreen)
+        case .failed(let detail):
+            Label(detail, systemImage: "exclamationmark.triangle.fill")
+                .foregroundStyle(Theme.accent)
+        }
+    }
+
     func savePirateKey() {
-        Store.defaults.set(pirateKey.trimmingCharacters(in: .whitespacesAndNewlines), forKey: Store.pirateKeyKey)
-        Task { await model.refresh(force: true) }
+        keyFieldFocused = false
+        let key = pirateKey.trimmingCharacters(in: .whitespacesAndNewlines)
+        pirateKey = key
+        Store.defaults.set(key, forKey: Store.pirateKeyKey)
+        let haptics = UINotificationFeedbackGenerator()
+
+        guard !key.isEmpty else {
+            keyCheck = .removed
+            haptics.notificationOccurred(.success)
+            Task { await model.refresh(force: true) }
+            return
+        }
+
+        keyCheck = .checking
+        Task {
+            do {
+                // One test call so you know right away whether the key works.
+                let result = try await PirateWeatherClient(apiKey: key).fetch(Places.stowe)
+                let minutes = result.nextHour?.points.count ?? 0
+                keyCheck = .working("Saved and working. Got \(minutes) minutes of data for Stowe.")
+                haptics.notificationOccurred(.success)
+            } catch HTTPError.status(let code) where code == 401 || code == 403 {
+                keyCheck = .failed("Saved, but Pirate Weather rejected this key. Check that you copied all of it.")
+                haptics.notificationOccurred(.error)
+            } catch HTTPError.status(429) {
+                keyCheck = .failed("Saved, but this key is out of calls for now. Upslope will use Open-Meteo until it resets.")
+                haptics.notificationOccurred(.warning)
+            } catch {
+                keyCheck = .failed("Saved, but couldn't reach Pirate Weather to check it. Try again when you have signal.")
+                haptics.notificationOccurred(.warning)
+            }
+            await model.refresh(force: true)
+        }
     }
 
     func add() {

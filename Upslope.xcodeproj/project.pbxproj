@@ -31,6 +31,7 @@
 		736281AFE470367214BA2921 /* Components.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85B9A33AA36D4EFBAB74BE07 /* Components.swift */; };
 		74FBA5FE39290CB8B4FE63DC /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40DC24AFE472FE398BFA11B2 /* RootView.swift */; };
 		8B7115B050F65D97BBC57E7C /* NextHourWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = A775B13C79BC816F13863A48 /* NextHourWidget.swift */; };
+		8D6EE37953BC83787201D08A /* DayPlanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1F8C2874451D5548ED9610 /* DayPlanView.swift */; };
 		923195BE679F92543024594F /* Barlow-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = B7934672A198A615FC43D6D8 /* Barlow-SemiBold.ttf */; };
 		92DA577016EDF8384EC53896 /* ForecastLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 775751C1C3015893F07D1114 /* ForecastLoader.swift */; };
 		9A90AA35C9CC71CC6B6C05DC /* PlaceIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E96516D00577E885692E37B /* PlaceIntent.swift */; };
@@ -118,6 +119,7 @@
 		EC9D0A46CEA3BE8F96106C33 /* UpslopeWidgets.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = UpslopeWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		ED39E2719CC76CB1F104D953 /* Store.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Store.swift; sourceTree = "<group>"; };
 		EEBBA7425AE3AFD3A6503909 /* MansfieldView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MansfieldView.swift; sourceTree = "<group>"; };
+		FE1F8C2874451D5548ED9610 /* DayPlanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayPlanView.swift; sourceTree = "<group>"; };
 		FFBA357591CB1A9EDF32EF79 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
@@ -182,6 +184,7 @@
 			isa = PBXGroup;
 			children = (
 				85B9A33AA36D4EFBAB74BE07 /* Components.swift */,
+				FE1F8C2874451D5548ED9610 /* DayPlanView.swift */,
 				2E2FA21B57CB6A1D4D0ACA17 /* DiagnosticsView.swift */,
 				EEBBA7425AE3AFD3A6503909 /* MansfieldView.swift */,
 				631EDEA301CCE3D7E4AE040A /* NowView.swift */,
@@ -409,6 +412,7 @@
 				2615047EE263457192A86695 /* AppModel.swift in Sources */,
 				B88EA5247FA1D233DFEF9340 /* BarsView.swift in Sources */,
 				736281AFE470367214BA2921 /* Components.swift in Sources */,
+				8D6EE37953BC83787201D08A /* DayPlanView.swift in Sources */,
 				1685B0FAD72E718A3CF85F69 /* DiagnosticsView.swift in Sources */,
 				F74E42EB057EA6E9379B82A6 /* ForecastLoader.swift in Sources */,
 				D0A172EC59DBEB39E3473FCE /* LiveActivityManager.swift in Sources */,

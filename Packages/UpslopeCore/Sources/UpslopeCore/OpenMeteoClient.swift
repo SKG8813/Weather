@@ -13,11 +13,11 @@ public struct OpenMeteoClient: Sendable {
         "temperature_2m", "apparent_temperature", "precipitation", "rain", "snowfall",
         "precipitation_probability", "wind_speed_10m", "wind_gusts_10m", "wind_direction_10m",
         "freezing_level_height", "wind_speed_850hPa", "wind_direction_850hPa",
-        "temperature_850hPa", "relative_humidity_850hPa"
+        "temperature_850hPa", "relative_humidity_850hPa", "cloud_cover"
     ]
     static let dailyFields = [
         "weather_code", "temperature_2m_max", "temperature_2m_min", "precipitation_probability_max",
-        "rain_sum", "showers_sum", "snowfall_sum", "precipitation_sum"
+        "rain_sum", "showers_sum", "snowfall_sum", "precipitation_sum", "sunrise", "sunset"
     ]
     static let currentFields = [
         "temperature_2m", "apparent_temperature", "wind_speed_10m", "wind_gusts_10m", "wind_direction_10m"
@@ -151,7 +151,28 @@ public struct OpenMeteoData: Sendable {
                 date: t, high: hi, low: lo,
                 precipChance: (v("precipitation_probability_max") ?? 0) / 100,
                 rainInches: rain, snowInches: snow,
-                symbol: Self.symbol(code: v("weather_code").map { Int($0) }, rain: rain, snow: snow)
+                symbol: Self.symbol(code: v("weather_code").map { Int($0) }, rain: rain, snow: snow),
+                sunrise: v("sunrise").map { Date(timeIntervalSince1970: $0) },
+                sunset: v("sunset").map { Date(timeIntervalSince1970: $0) }
+            )
+        }
+    }
+
+    public var hours: [HourPoint] {
+        hourlyTimes.indices.compactMap { i in
+            guard let t = hourlyValue("temperature_2m", at: i) else { return nil }
+            return HourPoint(
+                time: hourlyTimes[i],
+                temperature: t,
+                feelsLike: hourlyValue("apparent_temperature", at: i) ?? t,
+                precipitation: hourlyValue("precipitation", at: i) ?? 0,
+                rain: hourlyValue("rain", at: i) ?? 0,
+                snowfall: hourlyValue("snowfall", at: i) ?? 0,
+                probability: (hourlyValue("precipitation_probability", at: i) ?? 0) / 100,
+                windSpeed: hourlyValue("wind_speed_10m", at: i) ?? 0,
+                windGust: hourlyValue("wind_gusts_10m", at: i),
+                windBearing: hourlyValue("wind_direction_10m", at: i),
+                cloudCover: hourlyValue("cloud_cover", at: i)
             )
         }
     }

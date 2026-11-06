@@ -62,7 +62,9 @@ public struct ForecastService: Sendable {
             current: p?.current ?? o?.current,
             nextHour: nextHour,
             nextHourSource: source,
-            days: Array(days.prefix(7))
+            days: Array(days.prefix(7)),
+            hours: o?.hours,
+            timeZoneID: o?.timeZone.identifier
         )
     }
 }

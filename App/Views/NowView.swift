@@ -43,8 +43,9 @@ struct NowView: View {
                     CurrentRow(current: c, today: forecast?.days.first)
                 }
 
-                if let days = forecast?.days, !days.isEmpty {
-                    SevenDayView(days: days, placeName: forecast?.placeName ?? "", now: model.now)
+                if let forecast, !forecast.days.isEmpty {
+                    SevenDayView(forecast: forecast, place: model.place, mountain: model.mountain,
+                                 snark: model.settings.snark, now: model.now)
                 }
             }
             .padding(.horizontal, 20)
@@ -196,9 +197,20 @@ struct CurrentRow: View {
 }
 
 struct SevenDayView: View {
-    var days: [DayForecast]
-    var placeName: String
+    var forecast: Forecast
+    var place: PlaceChoice
+    var mountain: MountainForecast?
+    var snark: SnarkLevel
     var now: Date
+    @State private var selected: SelectedDay?
+
+    struct SelectedDay: Identifiable {
+        var day: DayForecast
+        var id: Date { day.date }
+    }
+
+    var days: [DayForecast] { forecast.days }
+    var placeName: String { forecast.placeName }
 
     var body: some View {
         let lo = days.map(\.low).min() ?? 0
@@ -211,6 +223,7 @@ struct SevenDayView: View {
                     .padding(.top, 14)
                     .padding(.bottom, 4)
                 ForEach(days, id: \.date) { d in
+                    Button { selected = SelectedDay(day: d) } label: {
                     HStack(spacing: 10) {
                         Text(Fmt.weekday(d.date, now: now))
                             .font(UFont.body(16, weight: .semibold))
@@ -235,15 +248,26 @@ struct SevenDayView: View {
                         }
                         .frame(height: 6)
                         Text(Fmt.temp(d.high)).fontWeight(.semibold).frame(width: 32, alignment: .leading)
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundStyle(Theme.muted)
                     }
                     .font(UFont.body(15))
                     .foregroundStyle(Theme.text)
                     .frame(minHeight: 52)
                     .padding(.horizontal, 16)
+                    .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
                     .overlay(alignment: .top) { Rectangle().fill(Theme.line).frame(height: 1) }
                     .accessibilityElement(children: .combine)
+                    .accessibilityHint("Shows the plan for the day")
                 }
             }
+        }
+        .sheet(item: $selected) { s in
+            DayPlanView(day: s.day, forecast: forecast, place: place, mountain: mountain, snark: snark)
+                .presentationDetents([.large])
         }
     }
 

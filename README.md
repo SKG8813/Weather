@@ -54,13 +54,21 @@ If you see a red error mentioning **App Groups**, click the small trash icon nex
 3. Open **Settings › Diagnostics**, wait for the checks to finish, and screenshot the results for Claude. If the stowe.com check fails, tap **Share the stowe.com page Upslope saw** and send that too.
 4. Add the widget: long-press the lock screen, tap **Customize › Lock Screen**, tap the widget area, and add **Upslope**. Tap the widget to choose *Current location* or *Stowe*.
 
-## The 7-day re-sign
+## The 7-day re-sign: use AltStore
 
-Apps signed with a free Apple ID stop opening after 7 days. Plug in the phone and press **Run** in Xcode again. Automatic re-signing is coming later.
+Apps signed with a free Apple ID stop opening after 7 days ("Upslope is no longer available"). AltStore re-signs Upslope automatically.
+
+1. **On the Mac:** install AltServer from [altstore.io](https://altstore.io) (AltStore Classic). Move it to Applications, open it (it lives in the menu bar), and install the Mail plug-in if it asks.
+2. **On the iPhone:** plug it in, and in Finder select the iPhone and turn on **Show this iPhone when on Wi-Fi**. Then use the AltServer menu › **Install AltStore** › your iPhone, signing in with your Apple ID.
+3. **Get Upslope.ipa:** on GitHub, open **Actions**, click the newest green **Build** run, and download **Upslope-ipa** at the bottom. Unzip it and AirDrop `Upslope.ipa` to the iPhone (save to Files).
+4. **Delete the Xcode-installed Upslope** from the phone, then in AltStore › **My Apps** tap **+** and choose `Upslope.ipa`.
+5. Keep AltServer running on the Mac. AltStore refreshes Upslope in the background when both are on the same Wi-Fi; open AltStore once a week to be safe.
 
 ## Updating to a new version
 
-Download the ZIP again (step 2), open the new **Upslope.xcodeproj**, set the Team again (step 4), and press Run.
+With AltStore: download the newest **Upslope-ipa** from GitHub Actions, AirDrop it to the phone, and install it from AltStore › My Apps › **+**. Your settings stay.
+
+With Xcode: download the ZIP again (step 2), open the new **Upslope.xcodeproj**, set the Team again (step 4), and press Run.
 
 ## Development
 

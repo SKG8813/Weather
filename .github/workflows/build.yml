@@ -22,21 +22,38 @@ jobs:
         run: swift test
 
   ios-build:
-    name: iOS build (no signing)
+    name: iOS build + IPA for AltStore
     runs-on: macos-latest
     needs: core-tests
     steps:
       - uses: actions/checkout@v4
       - name: Xcode version
         run: xcodebuild -version
-      # Builds the committed Upslope.xcodeproj, the same one you open on the Mac.
-      - name: Build for iOS Simulator
+      # Builds the committed Upslope.xcodeproj for real iPhones, unsigned.
+      # AltStore signs it with your own Apple ID when it installs it.
+      - name: Build for iPhone (unsigned)
         run: |
           set -o pipefail
           xcodebuild build \
             -project Upslope.xcodeproj \
             -scheme Upslope \
-            -destination 'generic/platform=iOS Simulator' \
-            CODE_SIGNING_ALLOWED=NO \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" \
             | tee build.log | grep -E "error:|warning: .*(deprecated|will be an error)|BUILD (SUCCEEDED|FAILED)" || true
           grep -q "BUILD SUCCEEDED" build.log
+      - name: Package Upslope.ipa
+        run: |
+          APP=build/Build/Products/Release-iphoneos/Upslope.app
+          test -d "$APP/PlugIns/UpslopeWidgets.appex"
+          mkdir -p ipa/Payload
+          cp -R "$APP" ipa/Payload/
+          (cd ipa && zip -qry ../Upslope.ipa Payload)
+          ls -lh Upslope.ipa
+      - name: Upload Upslope.ipa
+        uses: actions/upload-artifact@v4
+        with:
+          name: Upslope-ipa
+          path: Upslope.ipa
+          retention-days: 30
